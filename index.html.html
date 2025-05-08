@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Impostos - FiscaLeve (Aprimorada)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+/* Estilos Globais */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f4f7fc;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 650px;
+    text-align: center;
+}
+
+header h1 {
+    color: #1a2b5f;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+header p {
+    color: #5a78c7; /* Tom mais claro do azul primário */
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    font-weight: 500;
+}
+
+main h2 {
+    color: #1a2b5f;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #3a5fcd;
+    display: inline-block;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d1d9e6;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3a5fcd;
+    box-shadow: 0 0 0 3px rgba(58, 95, 205, 0.2);
+}
+
+#btnCalcular {
+    background-color: #3a5fcd;
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+#btnCalcular:hover {
+    background-color: #2a4d8f;
+    transform: translateY(-2px);
+}
+
+#btnCalcular.calculating {
+    background-color: #ffc107; /* Amarelo para feedback */
+    color: #333;
+}
+
+.feedback-area {
+    margin-top: 1rem;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    min-height: 40px; /* Para evitar que o layout salte quando a mensagem aparece/desaparece */
+}
+
+.feedback-area.error {
+    background-color: #ffebee; /* Vermelho claro para erro */
+    color: #c62828; /* Vermelho escuro para texto de erro */
+    border: 1px solid #ef9a9a;
+}
+
+.feedback-area.success {
+    background-color: #e8f5e9; /* Verde claro para sucesso */
+    color: #2e7d32; /* Verde escuro para texto de sucesso */
+    border: 1px solid #a5d6a7;
+}
+
+.feedback-area.warning {
+    background-color: #fff3e0; /* Laranja claro para aviso */
+    color: #e65100; /* Laranja escuro para texto de aviso */
+    border: 1px solid #ffcc80;
+}
+
+.results-section {
+    margin-top: 2.5rem;
+    padding: 20px;
+    background-color: #f9faff;
+    border-radius: 8px;
+    border: 1px solid #e0e7ff;
+    text-align: left;
+}
+
+.results-section h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+#resultadoCalculo p {
+    font-size: 1.05rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+}
+
+#resultadoCalculo strong {
+    font-weight: 600;
+    color: #3a5fcd;
+}
+
+.disclaimer {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-style: italic;
+}
+
+footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e7ff;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    header h1 {
+        font-size: 1.8rem;
+    }
+    header p {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+    main h2 {
+        font-size: 1.4rem;
+    }
+    #btnCalcular {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calculadora de Impostos</h1>
+            <p>Simule os impostos para seu negócio com o FiscaLeve.</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Dados para Simulação</h2>
+                <div class="form-group">
+                    <label for="regimeTributario">Regime Tributário:</label>
+                    <select id="regimeTributario">
+                        <option value="mei">MEI (Microempreendedor Individual)</option>
+                        <option value="simples">Simples Nacional (para ME/EPP)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ganhoMensal">Ganho Mensal Bruto (R$):</label>
+                    <input type="text" id="ganhoMensal" placeholder="Ex: 5000.00">
+                </div>
+                <div class="form-group">
+                    <label for="tipoAtividade">Tipo de Atividade Principal:</label>
+                    <select id="tipoAtividade">
+                        <option value="servicos">Serviços</option>
+                        <option value="comercio">Comércio</option>
+                        <option value="industria">Indústria</option>
+                    </select>
+                </div>
+                <button id="btnCalcular">Calcular Impostos</button>
+                <div id="feedbackArea" class="feedback-area"></div>
+            </section>
+
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Resultado da Simulação</h2>
+                <div id="resultadoCalculo">
+                    <!-- Os resultados serão inseridos aqui pelo JavaScript -->
+                </div>
+                <p class="disclaimer">Atenção: Esta é uma simulação. Valores exatos dependem de múltiplos fatores e da legislação vigente. Consulte sempre um contador.</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 FiscaLeve. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const regimeTributarioSelect = document.getElementById("regimeTributario");
+    const ganhoMensalInput = document.getElementById("ganhoMensal");
+    const tipoAtividadeSelect = document.getElementById("tipoAtividade");
+    const btnCalcular = document.getElementById("btnCalcular");
+    const feedbackArea = document.getElementById("feedbackArea");
+    const resultsSection = document.getElementById("resultsSection");
+    const resultadoCalculoDiv = document.getElementById("resultadoCalculo");
+
+    const limiteMEIAnual = 81000.00;
+    const salarioMinimoReferencia = 1550.00; // Valor de referência para 2025, confirmar anualmente.
+
+    // Formatter para moeda brasileira
+    const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    // Função para limpar e exibir mensagens de feedback
+    function showFeedback(message, type, persistent = false) {
+        feedbackArea.textContent = message;
+        feedbackArea.className = "feedback-area"; // Reseta classes
+        if (type === "error") {
+            feedbackArea.classList.add("error");
+        } else if (type === "success") {
+            feedbackArea.classList.add("success");
+        } else if (type === "warning") {
+            feedbackArea.classList.add("warning");
+        }
+        
+        if (!persistent) {
+            setTimeout(() => {
+                if (feedbackArea.textContent === message) {
+                    feedbackArea.textContent = "";
+                    feedbackArea.className = "feedback-area";
+                }
+            }, 7000);
+        }
+    }
+
+    function resetButton() {
+        btnCalcular.classList.remove("calculating");
+        btnCalcular.textContent = "Calcular Impostos";
+        btnCalcular.disabled = false;
+    }
+
+    function parseCurrency(strValue) {
+        if (!strValue) return NaN;
+        strValue = String(strValue).replace(/[^\d,.]/g, "");
+        if (strValue.includes(",")) {
+            strValue = strValue.replace(/\./g, ""); 
+            strValue = strValue.replace(",", ".");
+        } else {
+            const lastDotIndex = strValue.lastIndexOf(".");
+            if (lastDotIndex !== -1 && strValue.indexOf(".") !== lastDotIndex) { // Mais de um ponto, provavelmente milhar
+                 const beforeLastDot = strValue.substring(0, lastDotIndex).replace(/\./g, "");
+                 const afterLastDot = strValue.substring(lastDotIndex + 1);
+                 strValue = beforeLastDot + "." + afterLastDot;
+            } else if (lastDotIndex === -1 && strValue.length > 2 && !strValue.includes(",")) {
+                // Heurística para números grandes sem separador decimal, mas com centavos implícitos
+                // Ex: 500000 -> 5000.00. Não é ideal, mas tenta cobrir alguns casos.
+                // Esta parte pode ser removida se causar problemas.
+            }
+        }
+        return parseFloat(strValue);
+    }
+
+    btnCalcular.addEventListener("click", () => {
+        btnCalcular.classList.add("calculating");
+        btnCalcular.textContent = "Calculando...";
+        btnCalcular.disabled = true;
+
+        resultsSection.style.display = "none";
+        resultadoCalculoDiv.innerHTML = "";
+        feedbackArea.textContent = "";
+        feedbackArea.className = "feedback-area";
+
+        const regimeTributario = regimeTributarioSelect.value;
+        const ganhoMensal = parseCurrency(ganhoMensalInput.value);
+        const tipoAtividade = tipoAtividadeSelect.value;
+
+        if (isNaN(ganhoMensal) || ganhoMensal <= 0) {
+            showFeedback("Por favor, insira um valor de ganho mensal bruto válido.", "error");
+            resetButton();
+            return;
+        }
+
+        if (!tipoAtividade) {
+            showFeedback("Por favor, selecione o tipo de atividade principal.", "error");
+            resetButton();
+            return;
+        }
+
+        let resultadoHTML = "";
+        const ganhoAnualEstimado = ganhoMensal * 12;
+
+        if (regimeTributario === "mei") {
+            if (ganhoAnualEstimado > limiteMEIAnual) {
+                showFeedback(
+                    `Atenção: Seu ganho anual estimado (${currencyFormatter.format(ganhoAnualEstimado)}) ultrapassa o limite do MEI de ${currencyFormatter.format(limiteMEIAnual)}. ` +
+                    "Você deverá solicitar o desenquadramento do MEI e migrar para outro regime tributário (ex: Simples Nacional). " +
+                    "Consulte um contador para regularizar sua situação.", 
+                    "warning", 
+                    true
+                );
+                resetButton();
+                return;
+            }
+
+            let inssMEI = salarioMinimoReferencia * 0.05;
+            let impostoMEI = inssMEI;
+            let tipoContribuicao = "INSS";
+
+            if (tipoAtividade === "comercio" || tipoAtividade === "industria") {
+                impostoMEI += 1.00; // ICMS
+                tipoContribuicao += " + ICMS";
+            } else if (tipoAtividade === "servicos") {
+                impostoMEI += 5.00; // ISS
+                tipoContribuicao += " + ISS";
+            }
+            // Nota: MEI com atividades mistas (ex: Comércio e Serviços) paga INSS + ICMS + ISS.
+            // A lógica atual simplifica para a atividade principal selecionada.
+
+            resultadoHTML = `
+                <p><strong>Regime Selecionado:</strong> MEI (Microempreendedor Individual)</p>
+                <p><strong>Ganho Mensal Bruto Informado:</strong> ${currencyFormatter.format(ganhoMensal)}</p>
+                <p><strong>Ganho Anual Estimado:</strong> ${currencyFormatter.format(ganhoAnualEstimado)} (Dentro do limite MEI de ${currencyFormatter.format(limiteMEIAnual)})</p>
+                <p><strong>Tipo de Atividade Principal:</strong> ${tipoAtividade.charAt(0).toUpperCase() + tipoAtividade.slice(1)}</p>
+                <hr>
+                <p><strong>Valor Mensal do DAS-MEI (Estimado):</strong> ${currencyFormatter.format(impostoMEI)}</p>
+                <p><em>Composição Estimada do DAS:</em></p>
+                <ul style="list-style-position: inside; padding-left: 10px; font-size: 0.95em;">
+                    <li>INSS (Previdência): ${currencyFormatter.format(inssMEI)} (5% do salário mínimo de referência: ${currencyFormatter.format(salarioMinimoReferencia)})</li>
+                    ${ (tipoAtividade === "comercio" || tipoAtividade === "industria") ? `<li>ICMS (Imposto Estadual): ${currencyFormatter.format(1.00)}</li>` : "" }
+                    ${ (tipoAtividade === "servicos") ? `<li>ISS (Imposto Municipal): ${currencyFormatter.format(5.00)}</li>` : "" }
+                </ul>
+                <hr>
+                <p style="font-size:0.9em; color:#555;"><em>Importante: O valor do DAS-MEI é fixo mensalmente, baseado no salário mínimo vigente e nas taxas de ICMS/ISS. O salário mínimo pode ser reajustado anualmente. Consulte sempre o Portal do Empreendedor para os valores oficiais e para gerar seu DAS.</em></p>
+            `;
+            showFeedback("Cálculo para MEI realizado com sucesso!", "success");
+
+        } else if (regimeTributario === "simples") {
+            // Lógica de simulação para Simples Nacional (baseada na estrutura anterior, adaptada para mensal)
+            // ATENÇÃO: Esta é uma simulação MUITO simplificada e pode não refletir a realidade complexa do Simples Nacional.
+            let aliquotaEfetiva = 0;
+            let impostoMensalEstimado = 0;
+            const receitaBrutaAnual = ganhoMensal * 12;
+
+            // A lógica de alíquotas abaixo é uma simplificação das faixas iniciais do Simples Nacional.
+            // O cálculo real do Simples Nacional envolve anexos, faixas de faturamento, e deduções.
+            if (tipoAtividade === "servicos") { // Exemplo: Anexo III ou V (simplificado)
+                if (receitaBrutaAnual <= 180000) { aliquotaEfetiva = 0.06; } // 6%
+                else if (receitaBrutaAnual <= 360000) { aliquotaEfetiva = 0.112; } // Alíquota marginal de 11.2%, mas a efetiva é menor.
+                else { aliquotaEfetiva = 0.135; } // Simplificado
+            } else if (tipoAtividade === "comercio") { // Exemplo: Anexo I
+                if (receitaBrutaAnual <= 180000) { aliquotaEfetiva = 0.04; } // 4%
+                else if (receitaBrutaAnual <= 360000) { aliquotaEfetiva = 0.073; }
+                else { aliquotaEfetiva = 0.095; }
+            } else if (tipoAtividade === "industria") { // Exemplo: Anexo II
+                if (receitaBrutaAnual <= 180000) { aliquotaEfetiva = 0.045; } // 4.5%
+                else if (receitaBrutaAnual <= 360000) { aliquotaEfetiva = 0.078; }
+                else { aliquotaEfetiva = 0.10; }
+            }
+
+            impostoMensalEstimado = ganhoMensal * aliquotaEfetiva;
+
+            resultadoHTML = `
+                <p><strong>Regime Selecionado:</strong> Simples Nacional (Simulação para ME/EPP)</p>
+                <p><strong>Ganho Mensal Bruto Informado:</strong> ${currencyFormatter.format(ganhoMensal)}</p>
+                <p><strong>Receita Bruta Anual Estimada:</strong> ${currencyFormatter.format(receitaBrutaAnual)}</p>
+                <p><strong>Tipo de Atividade Principal:</strong> ${tipoAtividade.charAt(0).toUpperCase() + tipoAtividade.slice(1)}</p>
+                <hr>
+                <p><strong>Alíquota Efetiva Estimada (Simples Nacional - Faixas Iniciais):</strong> ${(aliquotaEfetiva * 100).toFixed(2).replace(".", ",")}%</p>
+                <p><strong>Valor Estimado do Imposto Mensal (Simples Nacional):</strong> ${currencyFormatter.format(impostoMensalEstimado)}</p>
+                <hr>
+                <p style="font-size:0.9em; color:#555;"><em>Importante: Esta é uma simulação simplificada para o Simples Nacional. O cálculo real envolve diversos anexos, faixas de faturamento e pode variar significativamente. O limite de faturamento anual para ME é de R$ 360.000,00 e para EPP é de R$ 4.800.000,00. Consulte um contador para o cálculo preciso e enquadramento correto.</em></p>
+            `;
+            showFeedback("Simulação para Simples Nacional realizada! (Verifique as observações)", "success");
+        }
+
+        setTimeout(() => { // Simula um tempo de cálculo
+            resultadoCalculoDiv.innerHTML = resultadoHTML;
+            resultsSection.style.display = "block";
+            resetButton();
+            // Scroll para a seção de resultados para melhor visualização em telas menores
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }, 500); // Atraso de 0.5 segundo
+    });
+});
+    </script>
+</body>
+</html>
